@@ -20,8 +20,8 @@ class NeuralNetwork:
         self.lr = learningrate
 
         # 初始化激活函数
-        self.activation_func = lambda x: 1 / (1 + np.exp(-x)) # Sigmoid函数
-        # self.activation_func = lambda x: np.maximum(x, 0) # ReLU函数
+        # self.activation_func = lambda x: 1 / (1 + np.exp(-x)) # Sigmoid函数
+        self.activation_func = lambda x: np.maximum(x, 0) # ReLU函数
 
         # 初始化链接权重，使用了正态分布随机数进行初始化，均值为 0，标准差为隐藏层节点数的平方根的倒数，最后一个参数为矩阵形状
         self.wih = np.random.normal(0.0, pow(self.hnodes, -0.5), (self.hnodes, self.inodes))
@@ -54,10 +54,16 @@ class NeuralNetwork:
 
         hidden_errors = np.dot(self.who.T, output_errors)
 
-        # 更新权重，y * (1 - y)为sigmoid函数y(x)的导数
-        self.who += self.lr * np.dot((output_errors * final_output * (1.0 - final_output)),
-                                     np.transpose(hidden_outputs)) #transpose将隐藏层输出转置
-        self.wih += self.lr * np.dot((hidden_errors * hidden_outputs * (1.0 - hidden_outputs)), np.transpose(inputs))
+        output_gradient = final_output > 0
+        hidden_gradient = hidden_outputs > 0
+
+        self.who += self.lr * np.dot((output_errors * output_gradient), np.transpose(hidden_outputs))
+        self.wih += self.lr * np.dot((hidden_errors * hidden_gradient), np.transpose(inputs))
+
+        # sigmod版本反向传播，y * (1 - y)为sigmoid函数y(x)的导数
+        # self.who += self.lr * np.dot((output_errors * final_output * (1.0 - final_output)),
+        #                              np.transpose(hidden_outputs)) #transpose将隐藏层输出转置
+        # self.wih += self.lr * np.dot((hidden_errors * hidden_outputs * (1.0 - hidden_outputs)), np.transpose(inputs))
 
         return loss
 
@@ -75,7 +81,7 @@ def TrainNetwork():
     data_file = open("input/mnist_train.csv", "r")
     data_list = data_file.readlines()[1:] # 跳过第一行标题行
     data_file.close()
-    
+
     # 随机打乱数据
     np.random.shuffle(data_list)
     # 划分为59000张训练集和1000张验证集
