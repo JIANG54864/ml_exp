@@ -138,15 +138,13 @@ def showerror(testdata, lst):
     # 返回统计结果
     return results
 
-
-total = {}
-positive = {}
-training(total, positive)
-resultsSet = test(total, positive)
-print(resultsSet)
-print('预测正确率:' + str((resultsSet['TP'] + resultsSet['TN']) / (
+if __name__ == '__main__':
+    total = {}
+    positive = {}
+    training(total, positive)
+    resultsSet = test(total, positive)
+    print(resultsSet)
+    print('预测正确率:' + str((resultsSet['TP'] + resultsSet['TN']) / (
             resultsSet['TP'] + resultsSet['TN'] + resultsSet['FP'] + resultsSet['FN'])))
-print('查准率:' + str((resultsSet['TP'] / (resultsSet['TP'] + resultsSet['FP']))))
-print('查全率:' + str(resultsSet['TP'] / (resultsSet['TP'] + resultsSet['FN'])))
-
-
+    print('查准率:' + str((resultsSet['TP'] / (resultsSet['TP'] + resultsSet['FP']))))
+    print('查全率:' + str(resultsSet['TP'] / (resultsSet['TP'] + resultsSet['FN'])))
