@@ -4,7 +4,7 @@ import random
 import matplotlib.pyplot as plt
 import seaborn as sb
 
-def CulEntropy(data: pd.DataFrame, forecast_label: str) -> float:
+def cul_entropy(data: pd.DataFrame, forecast_label: str) -> float:
     """
     计算数据集关于预测标签的信息熵。
 
@@ -23,7 +23,7 @@ def CulEntropy(data: pd.DataFrame, forecast_label: str) -> float:
         Entropy += (prior_probability * np.log2(prior_probability)) #信息熵的公式
     return -Entropy
 
-def InfoGain(data: pd.DataFrame, label: str, forecast_label: str) -> float:
+def info_gain(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     """
     计算某个特征关于预测标签的信息增益。
 
@@ -35,16 +35,16 @@ def InfoGain(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     返回值:
     float: 信息增益值。
     """
-    total_entropy = CulEntropy(data, forecast_label)
+    total_entropy = cul_entropy(data, forecast_label)
     gain = total_entropy
     sub_frame = data[[label, forecast_label]] #选择指定特征列 label 和标签列 'brand'，生成一个新的子数据集
     group = sub_frame.groupby(label)
     for key, df in group:
-        gain -= (df.shape[0] / data.shape[0]) * CulEntropy(df, 'brand')
+        gain -= (df.shape[0] / data.shape[0]) * cul_entropy(df, 'brand')
         # 将子集的信息熵乘以子集大小与总数据集大小的比例，然后从总信息熵 gain 中减去该值，更新信息增益
     return gain
 
-def createmyID3Tree(data: pd.DataFrame) -> dict:
+def createmy_id3_tree(data: pd.DataFrame) -> dict:
     """
     递归创建决策树。
 
@@ -64,7 +64,7 @@ def createmyID3Tree(data: pd.DataFrame) -> dict:
     # 遍历所有特征，选择信息增益最大的特征作为当前节点的划分特征
     for column in data: #按列遍历
         if column != 'brand':
-            gain = InfoGain(data, column, 'brand')
+            gain = info_gain(data, column, 'brand')
             if bestGain < gain:
                 bestGain = gain
                 bestFeature = column
@@ -79,7 +79,7 @@ def createmyID3Tree(data: pd.DataFrame) -> dict:
     valueList = set(data[bestFeature]) # 获取划分特征中所有唯一取值
     for value in valueList:
         # 对每个取值，筛选出 data 中 bestFeature 等于 value 的子数据集。递归地为该子数据集构建子树
-        myTree[bestFeature][value] = createmyID3Tree(data[data[bestFeature] == value])
+        myTree[bestFeature][value] = createmy_id3_tree(data[data[bestFeature] == value])
     return myTree
 
 def decision(tree: dict, testVector: pd.Series):
@@ -106,7 +106,7 @@ def decision(tree: dict, testVector: pd.Series):
             else:
                 forecastLabel = childTree[key]
     return forecastLabel
-def splitdata(data: pd.DataFrame, random_seed: int = 66):
+def split_data(data: pd.DataFrame, random_seed: int = 66):
     """
     将数据集随机分割为训练集和测试集。
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     # 分割训练集与测试集
     train_set, test_set = splitdata(Data)
     # 训练决策树
-    ID3tree = createmyID3Tree(train_set)
+    ID3tree = createmy_id3_tree(train_set)
     # 初始化统计参数
     T1 = 0
     N1 = 0

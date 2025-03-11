@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import random
 
-def CulEntropy(data: pd.DataFrame, forecast_label: str) -> float:
+def cul_entropy(data: pd.DataFrame, forecast_label: str) -> float:
     """
     计算给定数据集中某一列的熵值。
 
@@ -22,7 +22,7 @@ def CulEntropy(data: pd.DataFrame, forecast_label: str) -> float:
     return -Entropy
 
 
-def InfoGain(data: pd.DataFrame, label: str, forecast_label: str) -> float:
+def info_gain(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     """
     计算某个特征关于预测标签的信息增益。
 
@@ -34,16 +34,16 @@ def InfoGain(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     返回值:
     float: 信息增益值。
     """
-    total_entropy = CulEntropy(data, forecast_label)
+    total_entropy = cul_entropy(data, forecast_label)
     gain = total_entropy
     sub_frame = data[[label, forecast_label]] #选择指定特征列 label 和标签列 'brand'，生成一个新的子数据集
     group = sub_frame.groupby(label)
     for key, df in group:
-        gain -= (df.shape[0] / data.shape[0]) * CulEntropy(df, 'brand')
+        gain -= (df.shape[0] / data.shape[0]) * cul_entropy(df, 'brand')
         # 将子集的信息熵乘以子集大小与总数据集大小的比例，然后从总信息熵 gain 中减去该值，更新信息增益
     return gain
 
-def CulIntrinsicInfo(data: pd.DataFrame, label: str) -> float:
+def cul_intrinsic_info(data: pd.DataFrame, label: str) -> float:
     """
     计算给定数据集中某个标签的固有信息量（Intrinsic Information）。
 
@@ -70,7 +70,7 @@ def CulIntrinsicInfo(data: pd.DataFrame, label: str) -> float:
     return intrinsic_info
 
 
-def GainRatio(data: pd.DataFrame, label: str, forecast_label: str) -> float:
+def gain_ratio(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     """
     计算某个特征关于预测标签的信息增益率（Gain Ratio）。
 
@@ -82,13 +82,13 @@ def GainRatio(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     返回值:
     float: 信息增益率值。
     """
-    info_gain = InfoGain(data, label, forecast_label)
-    intrinsic_info = CulIntrinsicInfo(data, label)
+    info_gain = info_gain(data, label, forecast_label)
+    intrinsic_info = cul_intrinsic_info(data, label)
     if intrinsic_info == 0:
         return 0
     return info_gain / intrinsic_info
 
-def createmyC45Tree(data: pd.DataFrame) -> dict:
+def createmy_c45_tree(data: pd.DataFrame) -> dict:
     """
     递归创建决策树（C4.5算法）。
 
@@ -106,7 +106,7 @@ def createmyC45Tree(data: pd.DataFrame) -> dict:
     info_gains = {}
     for column in data.columns:
         if column != 'brand':
-            info_gains[column] = InfoGain(data, column, 'brand')
+            info_gains[column] = info_gain(data, column, 'brand')
 
     # 计算信息增益的平均值
     avg_info_gain = np.mean(list(info_gains.values()))
@@ -124,7 +124,7 @@ def createmyC45Tree(data: pd.DataFrame) -> dict:
     bestFeature = None
 
     for feature in candidate_features:
-        gain_ratio = GainRatio(data, feature, 'brand')
+        gain_ratio = gain_ratio(data, feature, 'brand')
         if gain_ratio > bestGainRatio:
             bestGainRatio = gain_ratio
             bestFeature = feature
@@ -139,7 +139,7 @@ def createmyC45Tree(data: pd.DataFrame) -> dict:
     valueList = set(data[bestFeature])  # 获取划分特征中所有唯一取值
     for value in valueList:
         # 对每个取值，筛选出 data 中 bestFeature 等于 value 的子数据集。递归地为该子数据集构建子树
-        myTree[bestFeature][value] = createmyC45Tree(data[data[bestFeature] == value])
+        myTree[bestFeature][value] = createmy_c45_tree(data[data[bestFeature] == value])
     return myTree
 
 def decision(tree: dict, testVector: pd.Series):
@@ -174,7 +174,7 @@ def decision(tree: dict, testVector: pd.Series):
     else:
         return tree
 
-def splitdata(data: pd.DataFrame, random_seed: int = 66):
+def split_data(data: pd.DataFrame, random_seed: int = 66):
     """
     将数据集随机分割为训练集和测试集。
 
@@ -201,9 +201,9 @@ def splitdata(data: pd.DataFrame, random_seed: int = 66):
 if __name__ == '__main__':
     Data = pd.read_csv('input/cars.csv')
     # 分割训练集与测试集
-    train_set, test_set = splitdata(Data)
+    train_set, test_set = split_data(Data)
     # 训练决策树
-    C45tree = createmyC45Tree(train_set)
+    C45tree = createmy_c45_tree(train_set)
     # 初始化统计参数
     T1 = 0
     N1 = 0

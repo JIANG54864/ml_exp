@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 
-def CulGini(data: pd.DataFrame, forecast_label: str) -> float:
+def cul_gini(data: pd.DataFrame, forecast_label: str) -> float:
     """
     计算数据集关于预测标签的基尼值（基尼不纯度）。
 
@@ -20,7 +20,7 @@ def CulGini(data: pd.DataFrame, forecast_label: str) -> float:
         gini -= prior_probability ** 2
     return gini
 
-def GiniIndex(data: pd.DataFrame, label: str, forecast_label: str) -> float:
+def gini_index(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     """
     计算给定数据集的Gini指数。
 
@@ -41,7 +41,7 @@ def GiniIndex(data: pd.DataFrame, label: str, forecast_label: str) -> float:
     group = sub_frame.groupby(label)
     # 遍历每个分组，计算加权Gini指数
     for key, df in group:
-        gain += (df.shape[0] / data.shape[0]) * CulGini(df, forecast_label)
+        gain += (df.shape[0] / data.shape[0]) * cul_gini(df, forecast_label)
     return gain
 
 def find_best_split(data: pd.DataFrame, feature: str, label: str) -> float:
@@ -70,7 +70,7 @@ def find_best_split(data: pd.DataFrame, feature: str, label: str) -> float:
 
         # 计算加权基尼指
         total = len(left) + len(right)
-        gini = (len(left)/total)*CulGini(left, label) + (len(right)/total)*CulGini(right, label)
+        gini = (len(left)/total) * cul_gini(left, label) + (len(right) / total) * cul_gini(right, label)
 
         if gini < best_gini:
             best_gini = gini
@@ -96,7 +96,7 @@ def should_stop_split(data: pd.DataFrame, label: str, min_samples=2, max_depth=5
         return True
 
     # 当前节点纯度足够高
-    if CulGini(data, label) < 0.1:  # 可调阈值
+    if cul_gini(data, label) < 0.1:  # 可调阈值
         return True
 
     return False
@@ -117,7 +117,7 @@ def createmyCartTree(data, label, depth=5):
     best_feature = None
 
     for feature in data.columns.drop(label):
-        current_gini = GiniIndex(data, label, feature)
+        current_gini = gini_index(data, label, feature)
         if current_gini < min_gini:
             min_gini = current_gini
             best_feature = feature
@@ -162,7 +162,7 @@ def decision(tree: dict, sample: pd.Series):
     else:
         return decision(node['right'], sample)
 
-def splitdata(data: pd.DataFrame, random_seed: int = 66):
+def split_data(data: pd.DataFrame, random_seed: int = 66):
     """
     将数据集随机分割为训练集和测试集。
 

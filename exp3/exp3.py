@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def getTestDataset():
+def get_test_dataset():
     data_file = open("input/mnist_test.csv", "r")
     data_list = data_file.readlines()[1:]
     data_file.close()
@@ -68,7 +68,7 @@ class NeuralNetwork:
         return loss
 
 # 首先训练模型
-def TrainNetwork():
+def train_network():
     # 输入层有 28*28个神经元，隐藏层有50个神经元，输出层有10个神经元
     input_nodes = 784 # 每个样本表示 28×28 像素的灰度照片
     hidden_nodes = 50
@@ -122,7 +122,7 @@ def TrainNetwork():
 
 
 # 在测试集上测试
-def singleTest(x, n, c):
+def single_test(x, n, c):
     all_values = x.split(',')
     actural_result = all_values[0]
     formatInput = (np.asfarray(all_values[1:]) / 255.0 * 0.99) + 0.01
@@ -137,9 +137,9 @@ def singleTest(x, n, c):
 
 
 # 执行程序，统计结果
-def Run():
-    dataset = getTestDataset()
-    mynet, train_losses, validation_accuracies = TrainNetwork()
+def run():
+    dataset = get_test_dataset()
+    mynet, train_losses, validation_accuracies = train_network()
     statistics = {
         "correct": 0,
         "incorrect": 0,
@@ -155,10 +155,10 @@ def Run():
     plt.grid(True)
     plt.show()
 
-    [singleTest(data, mynet, statistics) for data in dataset]
+    [single_test(data, mynet, statistics) for data in dataset]
     print('完成第', epochs, '次学习')
     print(f"正确率为 {statistics.get('correct') / statistics.get('count')}")
 
 if __name__ == '__main__':
     epochs = 10
-    Run()
+    run()

@@ -20,13 +20,13 @@ def window(sample: pd.Series, trainSample: pd.Series, h):
     return math.exp(-diff.T * diff / (2 * h ** 2)) # 按公式算
 
 # 使用Parzen窗方法估计该类的条件概率密度
-def Parzen(sample: pd.Series, trainSet: pd.DataFrame):
+def parzen(sample: pd.Series, trainSet: pd.DataFrame):
     """
     使用Parzen窗方法估计样本属于某一类的条件概率密度。
 
     参数:
     sample - 测试样本
-    trainSet - 训练集
+    train_set - 训练集
 
     返回:
     条件概率密度
@@ -38,16 +38,16 @@ def Parzen(sample: pd.Series, trainSet: pd.DataFrame):
     return likelihood
 
 # Parzen窗分类器
-def ParzenClassifier(sample: pd.Series):
+def parzen_classifier(sample: pd.Series):
     """
     使用Parzen窗方法对样本进行分类。
 
     参数:
     sample - 测试样本
     """
-    posterior_1 = Parzen(sample, trainSet_1)
-    posterior_2 = Parzen(sample, trainSet_2)
-    posterior_3 = Parzen(sample, trainSet_3)
+    posterior_1 = parzen(sample, train_set_1)
+    posterior_2 = parzen(sample, train_set_2)
+    posterior_3 = parzen(sample, train_set_3)
     print(sample)
     print("p(w1): " + str(posterior_1))
     print("p(w2): " + str(posterior_2))
@@ -64,13 +64,13 @@ def ParzenClassifier(sample: pd.Series):
             print("Sample belong 类3")
 
 # 导入训练集数据
-trainSet_1 = pd.read_csv('input/ww1.csv')
-trainSet_2 = pd.read_csv('input/ww2.csv')
-trainSet_3 = pd.read_csv('input/ww3.csv')
+train_set_1 = pd.read_csv('input/ww1.csv')
+train_set_2 = pd.read_csv('input/ww2.csv')
+train_set_3 = pd.read_csv('input/ww3.csv')
 
-ParzenClassifier(pd.Series([0.5, 1.0, 0.0]))
-ParzenClassifier(pd.Series([0.31, 1.51, -0.50]))
-ParzenClassifier(pd.Series([-0.3, 0.44, -0.1]))
+parzen_classifier(pd.Series([0.5, 1.0, 0.0]))
+parzen_classifier(pd.Series([0.31, 1.51, -0.50]))
+parzen_classifier(pd.Series([-0.3, 0.44, -0.1]))
 
 print('--------------------------------------------------------------')
 print('k近邻:')
@@ -82,7 +82,7 @@ def one_dimension_KNN(testData: float, trainSet: pd.Series, k: int):
 
     参数:
     testData - 测试数据
-    trainSet - 训练集
+    train_set - 训练集
     k - 近邻数
 
     返回:
@@ -94,12 +94,12 @@ def one_dimension_KNN(testData: float, trainSet: pd.Series, k: int):
         distance.append(d)
     distance.sort()
     posterior = (k / trainSet.shape[0]) / (2 * distance[k - 1])
-    # 分子 k / trainSet.shape[0] 表示标点周围最近的 k 个样本，占训练集总样本的比例。分母 2 * distance[k - 1] 表示目标点附近的区间长度。
+    # 分子 k / train_set.shape[0] 表示标点周围最近的 k 个样本，占训练集总样本的比例。分母 2 * distance[k - 1] 表示目标点附近的区间长度。
     # 相除得到概率密度
     return posterior
 
 # 导入ww3类的x1特征
-trainSet1 = pd.read_csv('input/ww3.csv')['x1']
+train_set1 = pd.read_csv('input/ww3.csv')['x1']
 # 随机产生n=500个-2~2的1维随机数
 dimension1_randoms = np.random.uniform(-2, 2, 500)
 # 进行升序排序
@@ -110,9 +110,9 @@ dimension1_posterior_3 = []
 dimension1_posterior_5 = []
 # 计算后验概率
 for i in range(500):
-    dimension1_posterior_1.append(one_dimension_KNN(dimension1_randoms[i], trainSet1, 1))
-    dimension1_posterior_3.append(one_dimension_KNN(dimension1_randoms[i], trainSet1, 3))
-    dimension1_posterior_5.append(one_dimension_KNN(dimension1_randoms[i], trainSet1, 5))
+    dimension1_posterior_1.append(one_dimension_KNN(dimension1_randoms[i], train_set1, 1))
+    dimension1_posterior_3.append(one_dimension_KNN(dimension1_randoms[i], train_set1, 3))
+    dimension1_posterior_5.append(one_dimension_KNN(dimension1_randoms[i], train_set1, 5))
 # 画出三张一维的图像
 plt.subplot(131)
 plt.plot(dimension1_randoms, dimension1_posterior_1)
@@ -132,7 +132,7 @@ def two_dimension_KNN(x1: np.matrix, x2: np.matrix, trainSet: pd.DataFrame, k: i
 
     参数:
     x1, x2 - 测试数据的网格
-    trainSet - 训练集
+    train_set - 训练集
     k - 近邻数
 
     返回:
@@ -152,16 +152,16 @@ def two_dimension_KNN(x1: np.matrix, x2: np.matrix, trainSet: pd.DataFrame, k: i
     return posteriorMatrix
 
 # 导入ww2类的x1,x2特征
-trainSet2 = pd.read_csv('input/ww2.csv')[['x1', 'x2']]
+train_set2 = pd.read_csv('input/ww2.csv')[['x1', 'x2']]
 
 test_x1 = np.arange(-3, 2, 0.05)
 test_x2 = np.arange(0, 4, 0.05)
 
 matrix_x1, matrix_x2 = np.meshgrid(test_x1, test_x2)
 # 将两个一维数组转换为二维网格矩阵
-posterior1 = two_dimension_KNN(matrix_x1, matrix_x2, trainSet2, 1)
-posterior3 = two_dimension_KNN(matrix_x1, matrix_x2, trainSet2, 3)
-posterior5 = two_dimension_KNN(matrix_x1, matrix_x2, trainSet2, 5)
+posterior1 = two_dimension_KNN(matrix_x1, matrix_x2, train_set2, 1)
+posterior3 = two_dimension_KNN(matrix_x1, matrix_x2, train_set2, 3)
+posterior5 = two_dimension_KNN(matrix_x1, matrix_x2, train_set2, 5)
 
 fig = plt.figure(figsize=(12, 6), facecolor='w')
 ax1 = fig.add_subplot(131, projection='3d')
@@ -197,10 +197,10 @@ plt.title('two_dimension k=5')
 plt.show()
 
 # 导入三个类别的全部特征
-trainSet3_1 = pd.read_csv('input/ww1.csv')
-trainSet3_2 = pd.read_csv('input/ww2.csv')
-trainSet3_3 = pd.read_csv('input/ww3.csv')
-trainSet = [trainSet3_1, trainSet3_2, trainSet3_3]
+train_set3_1 = pd.read_csv('input/ww1.csv')
+train_set3_2 = pd.read_csv('input/ww2.csv')
+train_set3_3 = pd.read_csv('input/ww3.csv')
+train_set = [train_set3_1, train_set3_2, train_set3_3]
 
 # 三维的KNN方法
 def three_dimension_KNN(testData: np.matrix, k: int):
@@ -216,16 +216,16 @@ def three_dimension_KNN(testData: np.matrix, k: int):
     """
     distance = [[], [], []]
     posterior = []
-    for i in range(len(trainSet)):
-        for j in range(trainSet[i].shape[0]):
+    for i in range(len(train_set)):
+        for j in range(train_set[i].shape[0]):
             # 仍然是计算欧氏距离，只不过是三维
-            d = np.sqrt((testData[0, 0] - trainSet[i].iloc[j]['x1']) ** 2 +
-                        (testData[1, 0] - trainSet[i].iloc[j]['x2']) ** 2 +
-                        (testData[2, 0] - trainSet[i].iloc[j]['x3']) ** 2)
+            d = np.sqrt((testData[0, 0] - train_set[i].iloc[j]['x1']) ** 2 +
+                        (testData[1, 0] - train_set[i].iloc[j]['x2']) ** 2 +
+                        (testData[2, 0] - train_set[i].iloc[j]['x3']) ** 2)
             distance[i].append(d)
         distance[i].sort()
         V = 4 * np.pi * (distance[i][k - 1] ** 3) / 3 # 计算球体体积
-        posterior.append(k / (trainSet[i].shape[0]) / V)
+        posterior.append(k / (train_set[i].shape[0]) / V)
 
     print("类条件概率密度数组:" + str(posterior))
     return posterior.index(max(posterior))

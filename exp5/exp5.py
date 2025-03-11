@@ -2,7 +2,7 @@ import math
 import pandas as pd
 
 # 贝叶斯分类器
-def BayesClassifier(x, train: pd.DataFrame):
+def bayes_classifier(x, train: pd.DataFrame):
     # 0表示遇难 1表示存活
     type0 = train[train['Survived'] == 0]
     type1 = train[train['Survived'] == 1]
@@ -40,7 +40,7 @@ def BayesClassifier(x, train: pd.DataFrame):
 
 
 # 填充缺失值
-def processData(dataframe: pd.DataFrame):
+def process_data(dataframe: pd.DataFrame):
     # print(dataframe.info())
     # 删除无用特征
     for name in dataframe.columns:
@@ -72,26 +72,26 @@ train = pd.read_csv("input/train.csv")
 test = pd.read_csv("input/test.csv")
 
 # 数据预处理
-processData(train)
-processData(test)
+process_data(train)
+process_data(test)
 
-Array = []
+array = []
 for i in range(5):
     # 随机抽样
-    Array.append(train.sample(frac=1, replace=True, axis=0))
+    array.append(train.sample(frac=1, replace=True, axis=0))
 
 # 储存分类结果
-isSurvived = []
+is_survived = []
 for index, row in test.iterrows():
     t = []
     # 每一个测试数据放到5个子分类器中进行分类
     for i in range(5):
-        t.append(BayesClassifier(row, Array[i]))
-    isSurvived.append(t)
+        t.append(bayes_classifier(row, array[i]))
+    is_survived.append(t)
 
 # 投票决定最终预测
 vote = []
-for item in isSurvived:
+for item in is_survived:
     SurvivedCount = str(item).count('1')
     if SurvivedCount > 2:
         vote.append(1)
