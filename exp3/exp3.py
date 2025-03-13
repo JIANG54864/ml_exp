@@ -50,7 +50,14 @@ class NeuralNetwork:
 
         output_errors = targets - final_output
 
-        loss = np.sqrt(np.sum(np.square(final_output - targets)) / len(final_output))
+        # 计算Softmax
+        exp_values = np.exp(final_output - np.max(final_output))  # 防止数值溢出
+        softmax_output = exp_values / np.sum(exp_values)
+
+        # 计算交叉熵损失
+        loss = -np.sum(targets * np.log(softmax_output))
+
+        # loss = np.sqrt(np.sum(np.square(final_output - targets)) / len(final_output))
 
         hidden_errors = np.dot(self.who.T, output_errors)
 
@@ -74,7 +81,7 @@ def train_network():
     hidden_nodes = 50
     output_nodes = 10 # 输出层有10个神经元，对应10个数字
     # 学习率
-    learning_rate = 0.01
+    learning_rate = 0.005
     mynet = NeuralNetwork(inputnodes=input_nodes, hiddennodes=hidden_nodes, outputnodes=output_nodes,
                           learningrate=learning_rate)
     # 导入训练数据
@@ -160,5 +167,5 @@ def run():
     print(f"正确率为 {statistics.get('correct') / statistics.get('count')}")
 
 if __name__ == '__main__':
-    epochs = 10
+    epochs = 7
     run()
