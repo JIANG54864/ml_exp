@@ -83,6 +83,59 @@ def train(data, alldata, positives):
 
 # 通过贝叶斯公式进行预测
 def predict(data, alldata, positives):
+    """
+    基于朴素贝叶斯分类器预测样本类别
+
+    参数:
+        data (pd.DataFrame): 待预测的样本数据，每行代表一个样本，每列代表一个特征
+        alldata (dict): 全局统计数据，包含每个特征的值分布和类别样本数。
+                        isDefault键对应各类别样本数，如alldata['isDefault'][0]表示类别0的样本数
+        positives (dict): 各特征在类别y=0下的条件计数，键为特征名，值为字典{特征值: 出现次数}
+
+    返回值:
+        list: 预测结果列表，元素为0或1，表示每个样本的预测类别
+    """
+    lista = []
+    # 计算先验概率：P(y=0) 和 P(y=1)
+    total_samples = alldata['isDefault'][0] + alldata['isDefault'][1]
+    p_y0 = alldata['isDefault'][0] / total_samples
+    p_y1 = alldata['isDefault'][1] / total_samples
+
+    # 遍历每个待预测样本
+    for index in data.index:
+        likelihood_y0 = 1.0
+        likelihood_y1 = 1.0
+
+        # 计算每个特征的条件概率（应用拉普拉斯平滑）
+        for column in data.columns:
+            value = data.loc[index, column]
+            unique_count = len(alldata[column].keys())
+
+            # 计算P(x_i|y=0)：特征值在不违约类中的条件概率
+            positive_num = positives[column].get(value, 0)
+            prob_y0 = (positive_num + 1) / (alldata['isDefault'][0] + unique_count)
+            likelihood_y0 *= prob_y0
+
+            # 计算P(x_i|y=1)：特征值在违约类中的条件概率
+            global_num = alldata[column].get(value, 0)
+            negative_num = global_num - positive_num
+            prob_y1 = (negative_num + 1) / (alldata['isDefault'][1] + unique_count)
+            likelihood_y1 *= prob_y1
+
+        # 计算归一化后的后验概率
+        numerator_y0 = p_y0 * likelihood_y0
+        numerator_y1 = p_y1 * likelihood_y1
+        denominator = numerator_y0 + numerator_y1
+        # 处理分母为零的特殊情况
+        posterior_y0 = numerator_y0 / denominator if denominator != 0 else 0.5
+
+        # 根据后验概率生成预测结果
+        lista.append(0 if posterior_y0 > 0.5 else 1)
+
+    return lista
+
+
+def predict_sample(data, alldata, positives):
     # 初始化预测结果列表
     lista = []
 
